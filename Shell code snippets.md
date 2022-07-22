@@ -1,4 +1,6 @@
 ### Shell code snippets
+### Reference: [Advanced Bash-Scripting Guide](https://tldp.org/LDP/abs/html/index.html)
+
 
 #### 1、测试是否采用正确数量的参数调用脚本
 
