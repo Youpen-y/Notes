@@ -6,7 +6,7 @@
 
 > she-bang or sh-bang, 来源是sharp(#) 和 bang(!)的结合
 > 
-> 一些 UNIX 风格（基于 4.2 BSD 的）据称采用四字节幻数，在 ! 之后需要一个空格。  `--#！ /bin/sh`。
+> 一些 UNIX 风格（基于 4.2 BSD 的）据称采用四字节幻数，在 ! 之后需要一个空格。  `--#！ /bin/sh`。
 
 ```bash
 # 调用不同的命令解释器
@@ -39,11 +39,11 @@
 
 更方便的是先授权，后执行
 
-`chmod 555 scriptname`    给每个人读取或执行权限
+`chmod 555 scriptname`    给每个人读取或执行权限
 
-`chmod +rx scriptname`    与上式等价
+`chmod +rx scriptname`    与上式等价
 
-`chmod u+rx scriptname `    只给脚本所有者读或执行权限
+`chmod u+rx scriptname `    只给脚本所有者读或执行权限
 
 通过`./scriptname`执行
 
@@ -144,21 +144,21 @@ set 命令具有三个退出值：
 
 > Using wildcards to get all the results that fits a certain pattern is precisely what we call globbing.
 
-`*`:    零个或多个字符
+`*`:    零个或多个字符
 
-`?`:    一个字符
+`?`:    一个字符
 
 #### 字符扩展
 
-`$#`:    命令行参数总数
+`$#`:    命令行参数总数
 
-`$*`:    用来展示所有命令行参数
+`$*`:    用来展示所有命令行参数
 
-`$0`:    脚本或程序名
+`$0`:    脚本或程序名
 
-`shift`:    将命令行参数左移一个位置，第一个参数丢失。
+`shift`:    将命令行参数左移一个位置，第一个参数丢失。
 
-`shift n`:    将命令行参数左移n个位置    
+`shift n`:    将命令行参数左移n个位置    
 
 #### Bash 大括号`{}`的使用
 
@@ -210,13 +210,13 @@ fi
 
 #### test - 检查文件类型和比较值
 
-`-n string`     string的长度非零  == `string`
+`-n string`     string的长度非零  == `string`
 
-`-z string`     string长度为零
+`-z string`     string长度为零
 
-`string1 = string2`    the strings are equal    == `string1 -eq string2`
+`string1 = string2`    the strings are equal    == `string1 -eq string2`
 
-`string1 != string2`    the strings are not equal
+`string1 != string2`    the strings are not equal
 
 `-ge`, `-gt`, `-le`, `-lt`, `-ne`, 
 
