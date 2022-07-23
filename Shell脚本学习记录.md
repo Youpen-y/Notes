@@ -6,7 +6,7 @@
 
 > she-bang or sh-bang, 来源是sharp(#) 和 bang(!)的结合
 > 
-> 一些 UNIX 风格（基于 4.2 BSD 的）据称采用四字节幻数，在 ! 之后需要一个空格。  `--#！ /bin/sh`。
+> 一些 UNIX 风格（基于 4.2 BSD 的）据称采用四字节幻数，在 ! 之后需要一个空格。  `--#！ /bin/sh`。
 
 ```bash
 # 调用不同的命令解释器
@@ -39,11 +39,11 @@
 
 更方便的是先授权，后执行
 
-`chmod 555 scriptname`    给每个人读取或执行权限
+`chmod 555 scriptname`    给每个人读取或执行权限
 
-`chmod +rx scriptname`    与上式等价
+`chmod +rx scriptname`    与上式等价
 
-`chmod u+rx scriptname `    只给脚本所有者读或执行权限
+`chmod u+rx scriptname `    只给脚本所有者读或执行权限
 
 通过`./scriptname`执行
 
@@ -144,21 +144,30 @@ set 命令具有三个退出值：
 
 > Using wildcards to get all the results that fits a certain pattern is precisely what we call globbing.
 
-`*`:    零个或多个字符
+`*`:    零个或多个字符
 
-`?`:    一个字符
+`?`:    一个字符
 
 #### 字符扩展
 
-`$#`:    命令行参数总数
+`$#`:    命令行参数总数，不含\$0
 
-`$*`:    用来展示所有命令行参数
+`$*`, `$@`:    用来展示所有命令行参数，不含\$0
 
-`$0`:    脚本或程序名
+- 区别：当包括在双引号中时，`$*`扩展为`$1c$2c$3c...`，c是$IFS的首字符，bash 内部字段分隔符变量，IFS用来字符分隔，默认值为“空格, tab, 或换行"。
+  
+  ```bash
+  set -- one two "three four"
+  # Everything after set -- is registered as a positional parameter
+  for arg in $@; do echo "$arg"; done
+  IFS=","; for arg in "$*"; do echo "$arg"; done
+  ```
 
-`shift`:    将命令行参数左移一个位置，第一个参数丢失。
+`$0`:    脚本或程序名
 
-`shift n`:    将命令行参数左移n个位置    
+`shift`:    将命令行参数左移一个位置，第一个参数丢失。
+
+`shift n`:    将命令行参数左移n个位置    
 
 #### Bash 大括号`{}`的使用
 
@@ -208,15 +217,51 @@ fi
 > builtins - 如果命令名称不包含斜杠，shell 会尝试定位它。如果存在同名的 shell 函数，则调用该函数，如上文 FUNCTIONS 中所述。如果名称与函数不匹配，shell 会在 shell 内置函数列表中搜索它。如果找到匹配项，则调用该内置函数。
 > 如果名称既不是 shell 函数也不是内置函数，并且不包含斜杠，bash 会在 PATH 的每个元素中搜索包含该名称的可执行文件的目录。 Bash 使用哈希表来记住可执行文件的完整路径名（请参阅下面的 SHELL BUILTIN COMMANDS 下的哈希）。仅当在哈希表中找不到该命令时，才会对 PATH 中的目录进行完整搜索。如果搜索不成功，shell 将搜索一个已定义的名为 command_not_found_handle 的 shell 函数。如果该函数存在，则使用原始命令和原始命令的参数作为其参数调用它，并且该函数的退出状态变为 shell 的退出状态。如果未定义该函数，shell 将打印一条错误消息并返回退出状态 127。
 
+#### [ ] 与 [[ ]]的区别
+
+- [[ ]] 结构是 [ ] 的更通用的Bash版本。是扩展了的test命令
+
+- [[ 和 ]] 之间没有文件名扩展或分词，但有参数扩展和命令替换。
+  
+  ```bash
+  file=/etc/passwd
+  
+  if [[ -e $file ]]
+  then
+      echo "Password file exists."
+  fi
+  ```
+
+- 使用[[ ... ]] 可以避免许多脚本中的逻辑错误，如，&&, ||, < 和 >操作符在[[ ]] 测试中奏效，而在[ ]结构中报错。
+
+- 八进制/十六进制常数的算术评估在 [[ ... ]] 构造中自动进行。
+  
+  ```bash
+  # [[ Octal and hexadecimal evaluation ]]
+  ```
+
+- 在 if 之后，无论是 test 命令还是测试括号（ [ ] 或 [[ ]] ）都不是绝对必要的。
+  
+  ```bash
+  dir=/home/bozo
+  if cd "$dir" 2>/dev/null; then
+  # 2>/dev/null 隐藏了错误信息
+     echo "Now in $dir."
+  else
+     echo "Can't change to $dir."
+  fi
+  # if COMMAND 返回COMMAND的退出状态
+  ```
+
 #### test - 检查文件类型和比较值
 
-`-n string`     string的长度非零  == `string`
+`-n string`     string的长度非零  == `string`
 
-`-z string`     string长度为零
+`-z string`     string长度为零
 
-`string1 = string2`    the strings are equal    == `string1 -eq string2`
+`string1 = string2`    the strings are equal    == `string1 -eq string2`
 
-`string1 != string2`    the strings are not equal
+`string1 != string2`    the strings are not equal
 
 `-ge`, `-gt`, `-le`, `-lt`, `-ne`, 
 
@@ -263,3 +308,261 @@ sed OPTIONS [Script] [Inputfilename]
   ```bash
   $sed '3 s/unix/linux/' geekfile.txt    # 替换第三行上的串
   ```
+
+#### 特殊字符
+
+- `**`
+  
+  - 指数操作符
+    
+    ```bash
+    let "z=5**3"    # 5 * 5 * 5
+    echo "z = $z"   # z = 125
+    ```
+  
+  - 扩展文件匹配通配符，新的`**`通配符递归匹配文件名和目录
+    
+    ```bash
+    #!/bin/bash4
+    shopt -s globstar  # Must enable globstar, otherwise ** doesn't work
+    
+    echo "Using *"; echo
+    for filename in *
+    do 
+        echo "$filename"
+    done    # Lists only files in current directory
+    echo; echo "----------------"; echo
+    
+    echo "Using **"
+    for filename in **
+    do
+        echo "$filename"
+    done    # Lists complete file tree, recursively
+    ```
+
+- `?`
+  
+  - 在双括号结构中，`?`充当C风格的三元操作符，测试操作符
+    
+    `(( condition?result-if-true:result-if-false ))`
+  
+  - 在参数替代表达式中，`?`测试一个变量是否已经被设置
+    
+    `${variablename?}`构造也可以检查脚本中设置的变量，`${variablename?"ERROR MESSAGE"}`可以制定错误消息
+  
+  - wild card，在匹配文件名扩展是充当单个字符的通配符，在扩展正则表达式中表示一个字符。
+
+- `$`
+  
+  - 变量替代，$variable表示variable代表的值
+  
+  - 行尾，在正则表达式中，$表示一行文本的末尾
+
+- `${}`
+  
+  - 参数替换，\${parameter}和\$parameter一样，是变量parameter的值。但某些情况下，只有\${parameter}奏效
+  
+  - 可用于将变量与字符串连接起来。
+    
+    ```bash
+    myid="${yourid} is not right"
+    echo ${myid}
+    ```
+
+- `$'...'`
+  
+  - 带引号的字符串扩展结构，此构造将单个或多个转义的八进制或十六进制值扩展为 ASCII 或 Unicode 字符。如`echo -e $unicode_var`
+    
+    ```bash
+    $ echo -e '\u2630'
+    ☰
+    # == echo -e '\xE2\x98\xB0' 可被早期Bash版本识别
+    ```
+
+- `$?`
+  
+  - 退出状态变量。持有命令，函数，脚本的退出状态
+
+- `$$`
+  
+  - 进程ID变量。$$ 变量持有其出现的脚本的进程 ID。
+
+- `()`
+  
+  - command group，命令组。括号内的命令列表开始一个子shell。括号内的变量，在子shell中，对脚本的其余部分不可见。父进程脚本无法读取子进程子shell中创建的变量。
+  
+  - array initialization，数组初始化。`Array=(element1 element2 element3)`
+
+- `{xxx, yyy, zzz,...}`
+  
+  - Brace expansion，大括号扩展。大括号内不允许有空格，除非空格被引用或转义。shell进行大括号扩展。命令如cat,cp本身作用于扩展的结果。
+    
+    ```bash
+    echo \"{These,words,are,quoted}\"
+    # "These" "words" "are" "quoted"
+    cat {file1,file2,file3} > combined_file
+    # 连接file1 file2, and file3 到 combined_file22.
+    cp file22.{txt,backup}
+    # Copies "file22.txt" to "file22.backup"
+    ```
+
+- `{a..z}`
+  
+  - 扩展的大括号扩展
+    
+    ```bash
+    echo {a..z}    # a b c ... z
+    echo {0..2}
+    
+    base64_charset=({A..Z} {a..z} {0..9} + / = )
+    ```
+
+- `{}`
+  
+  - Block of code, 代码块。也被称作内联组。这种结构创建一个匿名函数。不像标准函数，代码块中的变量对脚本的其余部分仍可见。
+    
+    ```bash
+    a=123
+    { a=321; }
+    echo "a = $a"    # a = 321
+    ```
+    
+    与（括号）中的命令组不同，如上所述，由 {braces} 括起来的代码块通常不会启动子shell
+
+- `[]`
+  
+  - test，测试[ ]中的表达式，分析见上文。
+  
+  - 数组元素，括号设置了数组中每个元素的编号
+  
+  - range of characters，作为正则表达式的一部分，方括号描述了要匹配的字符范围。
+
+- `$[...]`
+  
+  - 整数扩展，计算 $[ ] 之间的整数表达式。
+    
+    ```bash
+    a=3
+    b=7
+    echo $[$a+$b]    # 10
+    echo $[$a*$b]    # 21
+    ```
+    
+    > 请注意，此用法已被弃用，并已被 (( ... )) 构造取代。
+
+- `(())`
+  
+  - 整数扩展，计算(( ))中的整数表达式
+  
+  - 允许在Bash中进行C风格的变量操纵
+    
+    ```bash
+    (( a = 23 ))    # C风格设置变量,“等号两侧有空格”
+    (( a++ ))    # Post-increment 'a' C-style
+    # --------------------------------------
+    # 注意，就像在C中，pre-和post-decrement操作符有不同的效果
+    n=1; let --n && echo "True" || echo "False"    # False
+    n=1; let n-- && echo "True" || echo "False"    # True 
+    ```
+
+- `>  &>  >&  >>  <  <>`
+  
+  - 重定向，**scriptname >filename** 重定向 **scriptname**脚本的输出到文件**filename**。如果**filename**文件已存在则覆盖之。
+  
+  - **command &>filename**重定向指令的stdout和stderr到filename
+    
+    ```bash
+    $ type rmdir &>/dev/null
+    $ echo $?
+    0
+    ```
+  
+  - **command >&2**重定向命令的stdout到stderr
+  
+  - **scriptname >>filename**将 scriptname 的输出附加到文件 filename。如果文件名不存在，则创建它。
+  
+  - **[i]<>filename**打开filename进行读写，并为其分配文件描述符i。如果文件名不存在，则创建它。
+
+- `<<`
+  
+  - 被称为`here-document`结构，让程序知道文本末尾是什么，每当看到该分隔符时，程序都会读取您提供给程序的所有内容作为输入并对其执行任务。
+    
+    ```bash
+    $ wc << EOF
+    > one two three
+    > four five
+    > EOF
+    2 5 24    (2行5个单词24个字符)
+    ```
+
+- `<<<`
+  
+  - `here-string`，无需输入文本，而是将预先制作的文本字符串提供给程序。如，`bc <<< 5*4`可以获取特定情况的输出，而无须交互式运行bc。可认为其等价于`echo '5*4' | bc`。
+
+- `< <`
+  
+  - `< <`是语法错误，没有该操作符。
+  
+  - `< <()`是结合重定向（`<`）的进程替换(`<()`)。
+    
+    ```bash
+    $ wc -l < <(grep ntfs /etc/fstab)
+    4
+    $ wc -l <(grep ntfs /etc/fstab)
+    4 /dev/fd/63
+    # command1 < <( command2 )
+    ```
+
+- `<`, `>`
+  
+  - ASCII 比较，在`[]`中需要用 \ 转义，而在`[[]]`中不需要。
+
+- `\<`, `\>`
+  
+  - 转义尖括号--标记单词界限。
+  
+  - 尖括号必须被转义，否则它们只有字面字符含义。
+  
+  - "\\<the\>"匹配单词"the"，但不匹配"them"，"there"等。
+
+- `|`
+  
+  - 管道，传递前一条命令的输出（stdout）到下一条命令或shell的输入（stdin）。经典进程间通信。
+  
+  - 命令的输出或命令也可能被管道输入到一个脚本，`ls -l | ./uppercase.sh`
+  
+  - 如果管道中的命令之一中止，则会过早终止管道的执行。这种情况称为损坏的管道，会发送一个 SIGPIPE 信号。
+
+- `>|`
+  
+  - 强制重定向，即使设置了noclobber选项。这将强制覆盖现有文件。
+
+- `||`, `&&`
+  
+  - 逻辑操作符。
+
+- `&`
+  
+  - 在后台运行任务。在一条命令后加&，将使其在后台运行。
+    
+    ```bash
+    $ sleep 10 &
+    ```
+  
+  - 在脚本中，命令甚至循环都可能在后台运行。
+    
+    ```bash
+    #!/bin/bash
+    # background-loop.sh
+    for i in 1 2 3 4 5
+    do 
+        echo -n "$i "    # echo -n 不输出后面的换行符
+    done &    # 在后台运行该循环，有时在第二次循环是执行
+    for i in 11 12 13 14 15
+    do 
+        echo -n "$i"
+    done
+    # ------------------
+    # 执行结果顺序具有不确定性
+    # 脚本中在后台运行的命令可能会导致脚本挂起，等待击键。
+    ```
