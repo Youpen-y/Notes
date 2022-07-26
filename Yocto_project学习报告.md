@@ -242,8 +242,6 @@ subcommands:
     create-layer        Create a basic layer
 ```
 
- 
-
 #### BSP (Board Support Package)
 
 BSP是为特定硬件平台（special board）启动支持的层，通常由厂商提供并维护，为主板定义机器配置变量。在该层，可添加特定机器的recipes和定制的Boot loader, Kernel config, Graphics drivers (e.g. Xorg), 支持硬件特征的额外的recipes。在loongos-la64中，meta-loongson应该就是定制的BSP。
@@ -350,7 +348,7 @@ meta-loongson/
     classes            <-- 存在公共类文件(*.bbclass)
     conf               <-- 配置文件
     |
-    
+
     recipes-benchmarks
     recipes-bsp
     recipes-connectivity
@@ -381,10 +379,64 @@ OpenEmbedded-Core (OE-Core) ,是一个包含当前OpenEmbedded版本的核心元
 
 <img src="file:///home/yongy/Pictures/Screenshot%20from%202022-07-19%2015-42-18.png" title="" alt="Screenshot from 2022-07-19 15-42-18.png" width="259">
 
+
+
+-------------------------------------------------------
+
+### 构建一个定制的Linux发行版
+
+OE Core 和其他YP层包含几个示例镜像。这些镜像为经典Linux OS stack提供根文件系统配置。它们从最基本的**只能启动设备的镜像**到**有命令行提示的镜像**到**包含X Window System (X11)的镜像**。
+
+可以通过`find ./meta*/recipes*/images -name "*.bb" -print` 查看。
+
+大概有（加.bb文件）：
+
+- core-image-minimal：最基础，允许设备启动Linux命令行登陆。由BusyBox提供Login和命令行解释器。
+
+- core-image-minimal-initramfs：基本上与core-image-minimal相似，但Linux内核包含基于RAM的初始根文件系统（initramfs）。
+
+- core-image-minimal-mtdutils：在minimal的基础上，该镜像还包括与Linux内核中的内存技术设备（MTD）子系统交互的用户空间工具，以便在闪存设备上执行操作。
+
+- core-image-minimal-dev：在minimal的基础上，该镜像还为所有安装在根文件系统的包包括所有的开发包（头文件等）。如果与本机目标工具链一起部署在目标上，则它允许在目标上进行软件开发。与跨工具链一起部署在目标上，则它可以用于开发主机上的软件开发。
+
+- core-image-rt：基于minimal，该镜像构建YP实时内核和测试实时应用程序的工具。
+
+- core-image-rt-sdk：
+
+- core-image-base
+
+- core-image-full-cmdline
+
+- core-image-lsb
+
+- core-image-lsb-dev
+
+- core-image-lsb-sdk
+
+- core-image-x11
+
+- core-image-sato
+
+- core-image-sato-dev
+
+- core-image-sato-sdk
+
+- core-image-directfb
+
+- core-image-clutter
+
+- core-image-weston
+
+- qt4e-demo-image
+
+- core-image-multilib-example
+
+- core-image-testmaster, core-image-testmaster-initramfs
+
+- build-appliance-image
+
 #### 公共代码库
 
 http://git.yoctoproject.org
-
-
 
 #### 
