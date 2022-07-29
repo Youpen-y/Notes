@@ -379,8 +379,6 @@ OpenEmbedded-Core (OE-Core) ,是一个包含当前OpenEmbedded版本的核心元
 
 <img src="file:///home/yongy/Pictures/Screenshot%20from%202022-07-19%2015-42-18.png" title="" alt="Screenshot from 2022-07-19 15-42-18.png" width="259">
 
-
-
 -------------------------------------------------------
 
 ### 构建一个定制的Linux发行版

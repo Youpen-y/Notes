@@ -564,5 +564,144 @@ sed OPTIONS [Script] [Inputfilename]
     done
     # ------------------
     # 执行结果顺序具有不确定性
-    # 脚本中在后台运行的命令可能会导致脚本挂起，等待击键。
+    # 脚本中在后台运行的命令看似会导致脚本挂起，等待击键。
+    # 事实上，后台命令已经完成，并未挂起。在尾部加wait或重定向至文件或/dev/null
+    # 可解决
+    ```
+
+- `-`
+  
+  - 选项前缀。命令或过滤器的选项标志；参数替换中默认参数`${parameter-default}`，`${parameter:-default}` （若未设置paramete，使用default）
+    
+    ```shell
+    # 参数替换
+    var1=1
+    var2=2
+    echo ${var1-$var2}    # 1
+    echo ${var3-$var2}    # 2
+    
+    echo ${username-`whoami`}
+    # 如果变量$username unset, 输出`whoami`的结果
+    ```
+    
+    ```markdown
+    COMMAND -[Option1][Option2][...]
+    sort -dfu $filename
+    
+    if [ "$c" -eq 24 -a "$d" -eq 47 ]
+    then
+        echo "$c equals 24 and $d equals 47."
+    fi
+    ```
+
+- `--`
+  
+  - double-dash，命令长参数的前缀
+  
+  - 使用带有`--`选项的set命令将变量的内容显式分配给位置参数。如果`--`后没有变量，则取消设置位置参数。
+    
+    ```shell
+    #!/bin/bash
+    variable="one two three four five"
+    set -- $varibale
+    # Sets positional parameters to the contents of "$variable".
+    first_param=$1    # one
+    second_param=$2    # two
+    set --
+    # Unsets positional parameters if no variable specified.
+    first_param=$1    # null value
+    second_param=$2    # null value
+    ```
+  
+  - redirection from/to stdin or stdout
+    
+    ```shell
+    (cd /source/directory && tar cf - .) | 
+    (cd /dest/directory && tar xpvf  -)
+    # 将整个文件树从一个目录移动到另一个目录
+    # == cp -a /source/directory/* /dest/directory
+    # == cp -a /source/directory/* /source/directory/.[^.]* /dest/directory
+    # -------------------------------------------
+    # 1) cd /source/directory
+    #    源目录
+    # 2）&&
+    #    和，若 cd 成功，执行下一条指令
+    # 3）tar cf - .
+    #    c 意味着创建一个新的存档
+    #    f file, 之后的 - 指定目标文件作为标准输出，在当前目录下执行(.)
+    # 4) |
+    #    piped to ...
+    # 5) ( ... )
+    #    a subshell
+    # 6) cd /dest/directory
+    #    切换到目标目录
+    # 7) && 
+    # 8) tar xpvf -
+    #    'x' Unarchive, 'x' is a command, 'pvf' are options
+    #    'p' Preserve ownership and file permissions
+    #    'v' Send verbose messages to stdout
+    #    'f' Read data from stdin
+    ```
+  
+  - 先前工作目录。`cd -` 命令切换到上一个工作的目录，使用了`$OLDPWD`。
+  
+  - 减法操作符。
+
+- `=`
+  
+  - 等于号， 赋值操作符（no space before and after）
+  
+  - string comparison operator。test 指令中的`=`, `-eq`
+
+- `+`
+  
+  - 加号
+  
+  - 选项，使用`+`启用某个选项（减号禁用）
+  
+  - 在参数替换中，`+`作为变量扩展的替代值的前缀。
+    
+    ```shell
+    # ${parameter+alt_value}, ${parameter:+alt_value}
+    # 如果设置了parameter，使用alt_value，否则使用null字符串
+    # 两种格式仅在parameter被声明且为空不同
+    a=${param1:+xyz}
+    echo "a = $a"    # a =
+    
+    param2=
+    a=${param2:+xyz}    # a = 
+    a=${param2+xyz}    # a = xyz
+    ```
+
+- `%`
+  
+  - 求余
+  
+  - 在不同上下文中，%是模式匹配操作符
+
+- `~`
+  
+  - home 目录。对应于 $HOME 内部变量
+
+- `~+`
+  
+  - 当前工作目录。对应于 $PWD 内部变量
+
+- `~-`
+  
+  - 先前工作目录。对应于$OLDPWD内部变量
+
+- `=~`
+  
+  - 在双括号内使用`=~`进行正则表达式匹配测试
+    
+    ```shell
+    #!/bin/bash
+    variable="This is a fine mess."
+    # Regex matching with =~ operator within [[ double brackets ]]
+    if [[ "$variable" =~ T.........fin*es* ]]
+    # 注意，从bash 3.2版开始，去匹配的表达式无需在使用引号
+    then
+        echo "match found"
+    
     ```
