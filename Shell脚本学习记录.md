@@ -384,7 +384,7 @@ sed OPTIONS [Script] [Inputfilename]
   - 退出状态变量。持有命令，函数，脚本的退出状态
 
 - `$$`
-  
+
   - 进程ID变量。$$ 变量持有其出现的脚本的进程 ID。
 
 - `()`
@@ -703,5 +703,5 @@ sed OPTIONS [Script] [Inputfilename]
     # 注意，从bash 3.2版开始，去匹配的表达式无需在使用引号
     then
         echo "match found"
-    
+    fi
     ```
