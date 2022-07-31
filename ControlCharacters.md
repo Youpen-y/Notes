@@ -90,8 +90,6 @@
   分隔特定命令输入字段（fields of input）的特殊变量。它默认为空格。
   
   > 要在字符串或变量中保留空格，请使用引号。
-  
-  
 
 #### POSIX Character Classes [:class:]
 
@@ -142,5 +140,64 @@
   匹配十六进制数字，0-9A-Fa-f
 
 > POSIX character classes通常需要引号或双括号
+
+#### Parameter Substitution （参数替换）
+
+操纵和/或扩展变量
+
+- `${parameter}`
+  
+  == $parameter 即变量parameter的值。\${parameter}无歧义。
+  
+  ```shell
+  your_id=${USER}-on-${HOSTNAME}
+  echo "$your_id"
+  #
+  echo "Old \$PATH = $PATH"
+  PATH=${PATH}:/opt/bin
+  echo "New \$PATH = $PATH"
+  ```
+
+- `${parameter-default}, ${parameter:-default}`
+  
+  如果parameter未设置，使用default。区别：当parameter被设为空，前者使用parameter，后者采用default。
+
+> 默认参数构造可用于在脚本中提供缺失的命令行参数
+> 
+> ```bash
+> DEFAULT_FILENAME=generic.data
+> filename=${1:-$DEFAULT_FILENAME}
+> # 如果没有另外的指定，以下命令块运行在文件generic.data
+> # Begin-Command-Block
+> # ...
+> # ...
+> # End-Command-Block
+> # -----------------------------------------------
+> DISKS=${1:-E_NOPARAM}    # Must specify how many disks
+> # 如果提供了$1的话，设定$DISKS为$1命令行参数。
+> # 如果没有提供$1的话，设定为$E_NOPARAM
+> ```
+
+- `${parameter+alt_value}, ${parameter:+alt_value}`
+  
+  如果参数未设置，使用alt_value，否则使用null string。
+
+- `${parameter?err_msg}, ${parameter:?err_msg}`
+  
+  如果参数设置了，使用它。否则打印err_msg并且终止脚本，退出状态为1。
+  
+  仅当parameter设置为空时，有区别，区别同上。
+  
+  ```shell
+  #!/bin/bash
+  # usage-message.sh
+  : ${1?"Usage: $0 ARGUMENT"}
+  # Script exits here if command-line parameter absent
+  # with following error message.
+  #    usage-message.sh: 1: Usage: usage-message.sh ARGUMENT
+  # ... 
+  # 如果命令行缺失，$? 为1
+  # 如果命令行存在，$? 为0
+  ```
 
 
