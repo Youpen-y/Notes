@@ -79,9 +79,24 @@ echo "b = $b"    # BB34
 
 ##### special variable types
 
-- Local variables 局部变量
+- Local variables 局部变量变量仅在代码块或函数中可见。局部变量有局部范围。与C相反，仅当函数中的bash变量被声明为local时才为局部变量。
   
-  变量仅在代码块或函数中可见
+  ```shell
+  func ()
+  {
+      local loc_var=23    # 声明为local变量
+      echo
+      global_var=999    # 没有声明为local变量，默认为global
+  }
+  echo "\"loc_var\" outside function = $loc_var"
+  # "loc_var" outside function = 
+  echo "\"global_var\" outside function = $global_var"
+  # "global_var" outside function = 999
+  # 函数调用前，所有在函数中声明的变量的对外都是不可见的，不只是local变量
+  ```
+  
+  
+  
 
 - Environmental variables 环境变量
   
@@ -186,3 +201,5 @@ eval '[ -d "/proc/$lastjob" ] && kill -15 &lastjob'
   lastarg=${!args}    # last argument
   # Or lastarg=${!#}
   ```
+
+`shift`命令重排位置参数，`$1 <--- $2, $2 <--- $3, $3 <--- $4, etc`。旧的\$1消失，而\$0不变，仍为脚本名。
