@@ -62,3 +62,67 @@ done
 - `\a` alert （beep or flash）
 
 - `\0xx` 译为八进制0nn，`$'...'`带引号的字符串扩展结构是一种使用转义的八进制或十六进制值将ASCII字符分配给变量的机制，如quote=$'\042'
+
+常用转义
+
+- `\"` 转义字符`"`
+
+```shell
+echo "\"Hello\" ... he said."    # "Hello" ... he said.
+```
+
+- `\$` 转义字符`$`
+
+```shell
+echo "\$variable01"    # $variable01 
+```
+
+- `\\` 转义反斜杠`\`
+
+```shell
+echo "\\"    # \
+echo "\"     # 在终端中，弹出辅助输入。在脚本中，报错
+echo '\'     # \
+```
+
+
+
+---------
+
+&nbsp
+
+#### `cat <<EOF` 语法
+
+该语法在将多行字符串分配给shell变量、文件或管道时很有用。
+
+##### 将多行字符分配给shell变量
+
+```shell
+$ sql=$(cat <<EOF
+SELECT foo, bar FROM db
+WHERE foo='baz'
+EOF
+)
+```
+
+`$sql` 变量同时也包含换行符，
+
+##### 将多行字符传递给文件
+
+```shell
+$ cat <<EOF > print.sh
+#!/bin/bash
+echo \$PWD
+echo $PWD
+EOF
+```
+
+##### 将多行字符传递给管道
+
+```shell
+$ cat <<EOF | grep 'b' | tee b.txt
+foo
+bar
+baz
+EOF
+```
