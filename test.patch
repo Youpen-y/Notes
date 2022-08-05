@@ -1,0 +1,26 @@
+commit 510159db5ee9e952e7c05c7e25fb3b10f022350a
+Author: Youpen-y <1586590320@qq.com>
+Date:   Fri Aug 5 17:53:07 2022 +0800
+
+    Patch test
+
+diff --git a/Variable.md b/Variable.md
+index 5576477..284f96e 100644
+--- a/Variable.md
++++ b/Variable.md
+@@ -94,9 +94,6 @@ echo "b = $b"    # BB34
+   # "global_var" outside function = 999
+   # 函数调用前，所有在函数中声明的变量的对外都是不可见的，不只是local变量
+   ```
+-  
+-  
+-  
+ 
+ - Environmental variables 环境变量
+   
+@@ -203,3 +200,5 @@ eval '[ -d "/proc/$lastjob" ] && kill -15 &lastjob'
+   ```
+ 
+ `shift`命令重排位置参数，`$1 <--- $2, $2 <--- $3, $3 <--- $4, etc`。旧的\$1消失，而\$0不变，仍为脚本名。
++
++This is for patch
