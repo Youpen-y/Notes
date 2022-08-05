@@ -94,9 +94,6 @@ echo "b = $b"    # BB34
   # "global_var" outside function = 999
   # 函数调用前，所有在函数中声明的变量的对外都是不可见的，不只是local变量
   ```
-  
-  
-  
 
 - Environmental variables 环境变量
   
@@ -203,3 +200,5 @@ eval '[ -d "/proc/$lastjob" ] && kill -15 &lastjob'
   ```
 
 `shift`命令重排位置参数，`$1 <--- $2, $2 <--- $3, $3 <--- $4, etc`。旧的\$1消失，而\$0不变，仍为脚本名。
+
+This is for patch
