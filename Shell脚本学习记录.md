@@ -384,7 +384,7 @@ sed OPTIONS [Script] [Inputfilename]
   - 退出状态变量。持有命令，函数，脚本的退出状态
 
 - `$$`
-
+  
   - 进程ID变量。$$ 变量持有其出现的脚本的进程 ID。
 
 - `()`
@@ -705,3 +705,19 @@ sed OPTIONS [Script] [Inputfilename]
         echo "match found"
     fi
     ```
+
+#### LC_ALL=C
+
+`LC_ALL`是覆盖所有本地化设置（localisation settings）的环境变量。
+
+在一个脚本中，如果您想强制执行特定设置，因为您不知道用户已经强制执行了哪些设置（也可能是设置了LC_ALL），因此最好、最安全且通常唯一的选择是强制`LC_ALL`。
+
+> `C` locale is a special locale that is meant to be the simplest locale
+
+可以认为，其他 locale 是针对人类的，而 `C` locale 是针对计算机的。在`C` locale中，字符是单字节，字符集是ASCII（非必须，但实际上将在我们大多数人将使用的系统中），排序顺序基于字节值，语言通常是美国英语。一些系统上，与POSIX locale有所不同，例如未定义非ASCII字符的排列顺序。
+
+通常使用 `LC_ALL=C` 运行命令，以避免用户的设置干扰您的脚本。例如，如果您希望 [a-z] 匹配从 a 到 z 的 26 个 ASCII 字符，则必须设置 `LC_ALL=C`。
+
+在 GNU 系统上，`LC_ALL=C` 和 `LC_ALL=POSIX`（或 `LC_MESSAGES=C|POSIX`）会覆盖 `$LANGUAGE`，而 `LC_ALL=anything-else` 不会。
+
+示例： [详解]([environment variables - What does &quot;LC_ALL=C&quot; do? - Unix &amp; Linux Stack Exchange](https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do))
