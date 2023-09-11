@@ -1,0 +1,566 @@
+### 杂记
+
+#### OpenSSH
+
+OpenSSH 是使用SSH协议进行远程登录的主要连接工具。它加密所有流量以消除窃听、连接劫持和其他攻击。此外，OpenSSH提供了大量的安全隧道功能、多种身份验证方法和复杂的配置选项。
+
+OpenSSH套件包含以下工具：
+
+- 远程操作工具
+  
+  - ssh — OpenSSH远程登录客户端
+    
+    ssh（SSH 客户端）是一个用于登录远程机器并在远程机器上执行命令的程序。它旨在通过不安全的网络在两个不受信任的主机之间提供安全的加密通信。ssh连接并登录到`[user@]hostname`或`ssh://[user@]hostname[:port]`指定的主机。
+  
+  - scp — OpenSSH 安全文件传输
+    
+    scp 在网络上的主机之间复制文件。它使用 ssh进行数据传输，使用相同的身份验证并提供与登录会话相同的安全性。源和目标可以指定本地路径名，具有可选路径的远程主机，格式为`[user@]host:[path]`或`ssh://[user@]host[:port][/path]`
+    
+    本地文件名可以使用绝对或相对路径名明确，以避免scp将包含":"的文件名视为主机说明符。
+    
+    ```shell
+    scp [可选参数] file_source file_target
+    
+    # 参数说明：
+    # -B 使用批处理模式（传输过程中不询问传输口令或短语）
+    # -p 保留原文件的修改时间、访问时间和访问权限
+    # -q 不显示传输进度条
+    # -r 递归复制整个目录
+    # -v 详细方式显示输出
+    # ==========================================
+    指定用户名，命令执行后需要输入密码
+    未指定用户名，命令执行后需要输入用户名和密码
+    #1.1 复制文件（本地到远程）
+    scp local_file remote_username@remote_ip:remote_folder
+    # or (with new name)
+    scp local_file remote_username@remote_ip:remote_file
+    # or
+    scp local_file remote_ip:remote_folder
+    # or (with new name)
+    scp local_file remote_ip:remote_file
+    
+    # ------------------------------------------
+    #1.2 复制目录（本地到远程）
+    scp -r local_folder remote_username@remote_ip:remote_folder
+    # or
+    scp -r local_folder remote_ip:remote_folder
+    
+    # ------------------------------------------
+    #2 远程到本地
+    只需将从本地复制到远程的命令的后两个参数调换顺序即可。
+    scp remote_username@remote_ip:remote_file local_file
+    scp -r remote_username@remote_ip:remote_folder local_folder
+    ```
+    
+    注意：
+    
+    如果远程服务器防火墙为scp命令设置了指定的端口，我们需要使用-P参数来设置命令的端口，命令格式如下：
+    
+    ```shell
+    # scp 使用端口号 4588
+    scp -p 4588 remote_username@remote_ip:remote_file local_file
+    ```
+    
+    使用scp命令要确保使用的用户具有可读取远程服务器相应文件的权限，否则scp命令无法起作用。
+  
+  - sftp — OpenSSH安全文件传输
+    
+    sftp是一个文件传输程序，类似于ftp，通过加密的ssh传输执行所有操作。它还可能使用ssh的许多功能，例如公匙认证和压缩。目的地可以指定为`[user@]host[:path]`或`sftp://[user@]host[:port][/path]`。
+    
+    如果目的地包含路径且不是目录，如果使用非交互式身份验证方法，sftp将自动检索文件；否则它将在成功的交互式身份验证后这样做。如果没有指定路径，或者路径是目录，sftp将登录到指定的主机并进入交互命令模式，如果指定了则切换到远程目录。可选的尾部斜杠可用于强制将路径解释为目录。
+
+- 密钥管理工具
+  
+  - ssh-add
+  
+  - ssh-keysign
+  
+  - ssh-keyscan
+  
+  - ssh-keygen
+
+- 服务端工具
+  
+  - sshd — OpenSSH守护进程
+    
+    sshd 是ssh的守护程序，它在两个不受信任的主机之间不安全的网络上提供安全的加密通信。sshd监听来自客户端的链接，它通常在从/etc/rc引导时启动，为每个传入的连接派生一个新的守护进程。派生的守护进程处理密匙交换、加密、身份验证、命令执行和数据交换。sshd可以通过命令行选项或配置文件（默认sshd_config）配置。命令行选项配置会覆盖配置文件中指定的值。
+  
+  - sftp-server
+  
+  - ssh-agent
+
+#### vmlinuz——Linux 内核可执行文件
+
+- vmlinuz 是一个压缩的 Linux 内核，可引导。可引导意味着它能够将操作系统加载到内存中，以便计算机变得可用并且可以运行应用程序。vmlinuz不仅仅是一个压缩镜像，它还内置了 gzip 解压缩器代码。
+
+- 而vmlinux 是一个静态链接的可执行文件，它包含Linux内核，采用Linux支持的目标文件格式之一，包括可执行和可链接格式（Executable and Linkable Format, ELF）、通用目标文件格式（Common Object File, COFF）和a.out。内核调试、符号表生成或其他操作可能需要vmlinux文件，但在用作操作系统内核之前必须通过添加多引导头（multiboot header）、引导扇区（bootsector）和设置例程（setup routines）使其可引导。
+
+- vmlinuz 不应与 vmlinux 混淆，后者是非压缩和不可引导形式的内核。 vmlinux 通常只是生成 vmlinuz 的中间步骤。
+
+- vmlinuz在/boot目录下，该目录包含开始引导系统所需的文件。名为vmlinuz的文件可能是实际的内核可执行文件本身，也可能是内核可执行文件的链接（链接文件使用ls -l 查看时以字母l开始）。其名称也可能为特定内核版本
+
+##### vmlinuz词源
+
+UNIX平台称这种内核镜像为`/unix`。由于虚拟内存的发展，支持这种特征的内核有了`vm-`前缀以示区分。`vmlinux`是`vmunix`的变种，而`vmlinuz`尾部的`z`表示已压缩。
+
+#### initrd —— Initial ramdisk 临时文件系统
+
+在Linux系统中，initrd是一种将临时根文件系统加载到内存中的方案，用作Linux启动过程的一部分。`initrd`和`initramfs`是两种不同的实现方法。两者通常用于在真实根文件系统可以挂载之前做准备。
+
+#### read command in linux
+
+```shell
+$ read [options] [name...]
+```
+
+options 影响read命令如何与输入交互
+
+name 指定将拆分操作产生的实际单词存储在哪些变量中
+
+```shell
+$ read    # read 默认行为从标准输入流获取一行并将其赋值于内置变量REPLY
+This is a cool person
+$ echo $REPLY
+This is a cool person
+$ read input1 input2 input3
+> This is a cooool person
+$ echo "[$input1] [$input2] [$input3]"
+[This] [is] [a cooool person]
+# 如果变量的数量少于获得的单词，则所有剩余的单词及其分隔符都赋给最后一个变量。
+```
+
+默认情况下，read命令将输入拆分为单词，将<space>, <tab> 和 <newline> 字符视为分隔符。
+
+##### Internal Field Separator
+
+内部字符分隔符（IFS）确定给定行中的字边界。
+
+```shell
+$ {
+    IFS=";"
+    read input1 input2 input3
+    echo "[$input1] [$input2] [$input3]"
+}
+This;;is;a;cool;boy
+[This] [] [is;a;cool;boy]
+```
+
+```shell
+$ {
+    IFS=" "
+    read input1 input2 input3
+    echo "[$input1] [$input2] [$input3]"
+}
+This is  a cool boy
+[This] [is] [a cool boy]
+```
+
+空格分词的行为特殊，一个空格序列被视为一个分隔符。
+
+##### 基础选项
+
+- `-a` 数组，将单词拆分操作的结果存储在数组中而不是单独的变量中
+
+- `-e` 使用Bash内置的readline库读取输入行
+
+- `-s` 不要将输入行回显到标准输出流（密码实现不显示输入）
+
+- `-p` 提示，在从标准输入流中请求输入之前打印提示文本，不带<newline>字符
+
+- `-i` 文本，在标准输出流上打印文本作为默认输入（只能与-e结合使用）
+
+```shell
+# 使用 -s 和 -i 选项实现简易密码提示，以及隐藏字符
+$ {
+    read -p "username:" USERNAME
+    read -p "password:" -s PASSWORD
+    echo
+    echo -e "USERNAME:$USERNAME PASSWORD:$PASSWORD"
+}
+# username:yang
+# password:
+# USERNAME:yang PASSWORD:yongy
+```
+
+某些情况下，单词的数量因输入而异，需要利用数组。
+
+```shell
+$ {
+    declare -a input_array
+    text="This is default input"
+    read -e -i "$text" -a input_array
+    for input in "${input_array[@]}"
+        do
+            echo -n "[$input] "
+        done
+}
+$ {
+    read input1-abc    # invalid variable
+    echo "return code [$?]"
+}
+# bash: read: `input1-abc': not a valid identifier
+# return code [1]
+$ {
+    read input1_abc
+    echo "return code [$?]"
+}
+# return code [0]
+```
+
+##### 高级选项
+
+- `-d` delim（限界符），指定输入行的限界符而不是使用换行符。
+
+- `-u` fd，从给定文件描述符读取输入行
+
+- `-r` backslash不再转义字符
+
+- `-t` timeout，尝试在给定的秒数内读取输入
+
+- `-N` 从输入中读N个字符除非发生了超时或到达了EOF
+
+##### Read from Files
+
+`exec <filename` 命令将标准输入重定向到文件。从该命令开始，所有标准输入来自该文件，而非它的通常源（键盘输入）。提供一种方式按行读取文件，以及使用`sed`和/或`awk`对每行进行可能的分析。
+
+```shell
+#！/bin/bash
+# Redirecting stdin using 'exec'
+
+exec 6<&0    # 将文件表述符#6与标准输入stdin链接，保存标准输入
+
+exec < data-file    # 标准输入被文件“data-file"替代
+
+read a1    # 读取文件"data-file"的第一行
+read a2    # 读取文件"data-file"的第二行
+echo
+echo "----------------------------"
+echo $a1
+echo $a2
+echo; echo;
+exec 0<&6 6<&-    #从fd #6中恢复标准输入stdin， 并关闭fd #6 ,释放它以便其他进程使用
+# <&6 6<&- also works
+echo -n "Enter data "
+read b1 # 现在从标准输入中读取
+echo "-----------------------------"
+echo "b1 = $b1"
+echo
+exit 0
+```
+
+同样，exec >filename 命令将标准输出重定向到指定文件。将命令标准输出输出到该文件。
+
+##### 从其他命令读取（pipe redirection）
+
+# 
+
+#### 如何创建补丁文件？
+
+- 使用`diff`
+  
+  diff 是补丁文件的起源，要求有新旧两份代码副本。假设两份副本在文件夹old和new下。
+  
+  ```shell
+  $ diff -Naur old new > patch.txt
+  # -r 递归，设置后diff会将两个不同版本源代码目录中的所有对应文件全部进行一次比较
+  #    包括子目录文件
+  # -N 选项确保补丁文件将正确地处理已经创建或删除文件的情况
+  # -u, -U NUM, --unified[=NUM]
+  #    输出每个修改前后的3行（默认），也可以通过设置NUM输出更多的上下文
+  ```
+  
+  使用`patch`应用补丁: `patch [options] [originalfile [patchfile]]
+
+- 使用`git`
+  
+  使用git不需要未变副本模板来区分。
+  
+  - 为最近一次提交创建补丁
+    
+    ```shell
+    git show > patch.txt
+    ```
+  
+  - 在两个特定提交之间创建补丁
+    
+    ```shell
+    git diff commitid1 commitid2 > patch.txt
+    ```
+  
+  - 工具`format-patch`，用于格式化补丁以作为电子邮件发送
+    
+    为最后n个修订创建补丁（将在当前目录创建补丁，`-o` 允许指定不同的输出目录）
+    
+    ```shell
+    git format-patch -n 
+    ```
+  
+  [How to patch remote source code locally in yocto project?](https://stackoverflow.com/questions/73250864/how-to-patch-remote-source-code-locally-in-yocto-project)
+
+#### 使用dd构建USB启动盘
+
+1. 在 Linux 上查看 USB 设备名称
+
+```shell
+$ lsblk    # or $ df
+```
+
+`lsblk` 列举块设备。
+
+2. 构建可启动的USB棒
+
+```shell
+$ sudo dd if=xxx.iso of=/dev/sdd bs=1M status=progress
+```
+
+`dd` 命令会将数据写入U盘（此处记为/dev/sdd）。
+
+理解`dd`命令参数
+
+- `dd` 启动 dd 命令写入 DVD/CD iso 映像
+
+- `if=xxx.iso` 输入文件路径（镜像文件路径）
+
+- `of=/dev/sdd` 目的USB磁盘路径
+
+- `bs=1M` 一次读写的最大字节，此处是每次1M
+
+- `status=progress`  展示将镜像写入磁盘的进度条
+
+#### shell 终端上的一些快捷键操作
+
+- Ctrl+a 光标移至行首
+
+- Ctrl+e 光标移至行尾
+
+- Ctrl+u 删除光标前内容
+
+- Ctrl+k 删除光标后内容
+
+- Alt+b 移至单词（或上一单词）首
+
+- Alt+f 移至单词（或下一单词）尾
+
+- Ctrl+r 正向搜索历史命令
+  
+  - enter直接执行相应命令
+  
+  - 右箭头使得可以进一步修改该命令
+
+- Ctrl+s 逆向搜索历史命令
+
+#### apt-cache
+
+apt-cache - 查询APT缓存（query the APT cache）
+
+apt-cache对APT的包缓存执行许多操作，并不会操纵系统的状态，但提供从包元数据中查询和生成有趣的输出。
+
+> The metadata is acquired and updated via the `update` command of e.g. `apt-get`，so that it can be outdated if the last update is too long ago, but in exchange `apt-cache` works independently of the availability of the configured sources (e.g. offline)
+
+除非`-h`, `--help`选项被提供，以下命令之一必须被提供。
+
+- `gencaches`
+  
+  gencaches 生成APT的包缓存。由所有需要该缓存（但缺失或过时）的命令隐式完成。
+
+- `showpkg pkg...`
+  
+  showpkg 显示命令行上列举的package**s**的信息。
+
+- `stats`
+  
+  stats 展示有关缓存的一些统计。不需要更多的参数。
+  
+  ```shell
+  yongy@yongy-X542UN:~$ apt-cache stats
+  Total package names: 111966 (3,135 k)
+  Total package structures: 108828 (4,788 k)
+    Normal packages: 76163
+    Pure virtual packages: 1840
+    Single virtual packages: 17051
+    Mixed virtual packages: 2275
+    Missing: 11499
+      ... 
+  ```
+
+- `showsrc pkg...`
+  
+  showsrc 显示与给定包名称匹配的所有源包记录。显示所有版本，以及将名称声明为二进制包的所有记录。使用`--only-source`仅显示源包名称。
+
+#### find && -exec
+
+`find` 命令有两部分组成，表达式和动作。（expression and action）
+
+默认action `-print`，该动作将打印查询到的结果并用换行符分隔。
+
+而`-exec`动作允许在结果上执行命令。
+
+```shell
+$ find . -name *.c -exec file {} \;
+./test.c: ASCII text
+```
+
+拆解传递给`-exec`的参数（直接使用linux的exec函数执行命令，任何shell扩展、函数、别名在此不起作用）：
+
+- Command: `file`
+
+- Results placeholder: `{}`
+
+- Command delimiter: `\;` 
+
+之所以需要为find命令提供一个分隔符，是为了让其知道`-exec`参数在哪里停止。
+
+可以提供给`-exec`参数的两类分隔符：分号（`;`）、加号（`+`）。为了防止shell翻译分号，需要转义（`\;`）；而`+`不需要转义。
+
+两类分隔符的区别：
+
+- `\;`，将会对每个结果分别执行一次`command`
+
+- `+`，所有表达式结果将被连接并作为一个整体传递给`command`执行（仅执行一次）
+
+#### size
+
+size - 列举段大小和二进制文件的总大小
+
+options:
+
+- `-A`, `-B`, `-G`, `--format=compatibility`
+  
+  使用这些选项，可以选择不同的输出格式。
+  
+  （`-A` or `--format=sysv`）
+  
+  （`-B` or `--format=berkeley`）
+  
+  ```shell
+  $ size --format=Berkeley a.out
+     text       data        bss        dec        hex    filename
+     1861        616          8       2485        9b5    a.out
+  ```
+  
+  Berkeley 格式是size默认的输出，特征：将只读数据计算在`text`段而非数据段，`dec`和`hex`栏显示前三栏的总和。
+  
+  （`-G` or `--format=gnu`）将只读数据算在数据段。
+  
+  ```shell
+  $ size --format=gnu a.out
+  text       data        bss      total filename
+   637       1840          8       2485 a.out
+  ```
+
+- `-d`, `-o`, `-x`, `--radix=number`
+  
+  指定输出大小的进制
+  
+  （`-d` or `--radix=10`）
+  
+  （`-o` or `--radix=8`）
+  
+  （`-x` or `--radix=16`）
+
+#### C程序的内存布局
+
+C程序的典型内存映射由以下部分组成。
+
+- `text`段
+
+- 初始化`data`段
+
+- 未初始化数据段 `bss`
+
+- 栈
+
+- 堆
+
+```shell
+high memory    -->    |    stack    | 
+address               |      |      |
+                      |     \|/     |
+                      |             |
+                      |     /|\     |
+                      |      |      |
+                      |     heap    |
+                      |     .bss    | uninitialized data
+                      |    .data    | initialized data
+low memory addr  -->  |    .text    | text 
+```
+
+```
+Object file            Target memory
+    .bss    ---------->  |  RAM  |
+    .data   ---------->  |  RAM  |
+    .text   ----         |       |
+                |----->  |  ROM  |
+```
+
+#### 将文本文件转化为图片
+
+```shell
+$ soffice --convert-to png "filename"
+```
+
+通过`soffice --help`可查看相关手册。问题是只能输出固定长度的图片(部分文本)。
+
+解决方案
+
+- 使用`pango`
+  
+  ```shell
+  $ sudo apt install pango1.0-tools
+  ...
+  $ pango-view -qo imagename.png filename
+  ```
+
+- 使用`imagemagick`
+
+#### Linux 解压命令总结
+
+tar
+
+- `-c`: 建立压缩档案
+- `-x`: 解压（extract）
+- `-t`: 查看内容
+- `-r`: 向压缩归档文件末尾追加文件
+- `-u`: 更新原压缩包中的文件
+
+以上五个是独立命令，不能结合使用。以下参数可以根据需要在压缩或解压档案时可选。
+
+- `-z`: 有gzip属性的
+
+- `-j`: 有bz2属性的
+
+- `-Z`: 有compress属性的
+
+- `-v`: 显示所有过程
+
+- `-O`: 将文件解开到标准输出
+
+`-f`: 使用档案名字，该参数是最后一个参数，后面只能接档案（archive）名。
+
+```shell
+$ tar -cf all.tar *.jpg    # 将所有jpg文件打包到all.tar中，-f指定包的文件名
+```
+
+压缩
+
+```shell
+tar –cvf jpg.tar *.jpg  # 将目录里所有jpg文件打包成tar.jpg
+tar –czf jpg.tar.gz *.jpg   # 将目录里所有jpg文件打包成jpg.tar后，并且将其用gzip压缩，生成一个gzip压缩过的包，命名为jpg.tar.gz
+tar –cjf jpg.tar.bz2 *.jpg # 将目录里所有jpg文件打包成jpg.tar后，并且将其用bzip2压缩，生成一个bzip2压缩过的包，命名为jpg.tar.bz2
+tar –cZf jpg.tar.Z *.jpg   # 将目录里所有jpg文件打包成jpg.tar后，并且将其用compress压缩，生成一个umcompress压缩过的包，命名为jpg.tar.Z
+# rar格式的压缩，需要先下载rar for linux
+zip jpg.zip *.jpg   # zip格式的压缩，需要先下载zip for linux
+```
+
+解压缩
+
+```shell
+tar –xvf file.tar  # 解压 tar包
+tar -xzvf file.tar.gz # 解压tar.gz
+tar -xjvf file.tar.bz2   # 解压 tar.bz2
+tar –xZvf file.tar.Z   # 解压tar.Z
+unrar e file.rar # 解压rar
+unzip file.zip # 解压zip
+```
+
+
